@@ -10,6 +10,7 @@ export function Card({ className, children }: CardProps) {
   return (
     <div className={cn(
       'bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300',
+      'p-6', // Added padding
       className
     )}>
       {children}

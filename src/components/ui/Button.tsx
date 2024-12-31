@@ -39,6 +39,9 @@ export function Button({
         sizes[size],
         isLoading && 'opacity-70 cursor-not-allowed',
         disabled && 'opacity-50 cursor-not-allowed',
+        'shadow-md', // Added shadow
+        'hover:shadow-lg', // Added hover shadow
+        'focus:ring-offset-2', // Added focus ring offset
         className
       )}
       disabled={isLoading || disabled}

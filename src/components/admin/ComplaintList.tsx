@@ -1,40 +1,38 @@
 import React from 'react';
-import { useComplaints } from '../../hooks/useComplaints';
-import { StatusBadge } from '../StatusBadge';
+import { Complaint } from '../../types/database';
 
-export function ComplaintList() {
-  const { complaints, loading, updateComplaintStatus } = useComplaints();
+interface ComplaintListProps {
+  complaints: Complaint[];
+}
 
-  if (loading) return <div>Loading complaints...</div>;
-
+export function ComplaintList({ complaints }: ComplaintListProps) {
   return (
-    <div className="bg-white shadow rounded-lg p-6">
-      <h2 className="text-xl font-semibold mb-4">Recent Complaints</h2>
-      <div className="space-y-4">
-        {complaints.slice(0, 5).map((complaint) => (
-          <div key={complaint.id} className="border-b pb-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-medium">{complaint.title}</h3>
-                <p className="text-sm text-gray-600">{complaint.description}</p>
-              </div>
-              <StatusBadge status={complaint.status} />
-            </div>
-            <div className="mt-2 flex gap-2">
-              <select
-                value={complaint.status}
-                onChange={(e) => updateComplaintStatus(complaint.id, e.target.value)}
-                className="text-sm rounded border-gray-300"
-              >
-                <option value="pending">Pending</option>
-                <option value="in_progress">In Progress</option>
-                <option value="resolved">Resolved</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </div>
-          </div>
-        ))}
-      </div>
+    <div>
+      <h2>Complaints</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Location</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {complaints.map((complaint) => (
+            <tr key={complaint.id}>
+              <td>{complaint.id}</td>
+              <td>{complaint.title}</td>
+              <td>{complaint.description}</td>
+              <td>{complaint.category}</td>
+              <td>{complaint.location}</td>
+              <td>{complaint.status}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

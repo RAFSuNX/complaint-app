@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { handleError } from '../services/complaints';
 
 interface Stats {
   totalUsers: number;
@@ -26,16 +27,18 @@ export function useStats() {
           .select('*')
           .single();
 
-        if (error) throw error;
-        
-        setStats({
-          totalUsers: data.total_users || 0,
-          pendingComplaints: data.pending_complaints || 0,
-          resolvedComplaints: data.resolved_complaints || 0,
-          criticalIssues: data.critical_issues || 0,
-        });
+        if (error) {
+          handleError('fetch stats', error);
+        } else {
+          setStats({
+            totalUsers: data.total_users || 0,
+            pendingComplaints: data.pending_complaints || 0,
+            resolvedComplaints: data.resolved_complaints || 0,
+            criticalIssues: data.critical_issues || 0,
+          });
+        }
       } catch (err) {
-        console.error('Error fetching stats:', err);
+        handleError('fetch stats', err);
         setError(err instanceof Error ? err : new Error('Failed to fetch stats'));
       } finally {
         setLoading(false);

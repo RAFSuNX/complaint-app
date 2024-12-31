@@ -1,5 +1,12 @@
 import { supabase } from '../lib/supabase';
 import type { Complaint } from '../types/database';
+import { logError } from '../utils/logError';
+
+export function handleError(operation: string, error: any) {
+  const errorMessage = `Failed to ${operation}: ${error.message}`;
+  logError(errorMessage); // Log the error for debugging
+  throw new Error(errorMessage);
+}
 
 export async function fetchComplaints(): Promise<Complaint[]> {
   const { data, error } = await supabase
@@ -8,7 +15,7 @@ export async function fetchComplaints(): Promise<Complaint[]> {
     .order('created_at', { ascending: false });
 
   if (error) {
-    throw new Error(`Failed to fetch complaints: ${error.message}`);
+    handleError('fetch complaints', error);
   }
 
   return data || [];
@@ -22,7 +29,7 @@ export async function createComplaint(complaint: Omit<Complaint, 'id' | 'created
     .single();
 
   if (error) {
-    throw new Error(`Failed to create complaint: ${error.message}`);
+    handleError('create complaint', error);
   }
 
   return data;

@@ -34,6 +34,12 @@ export function TextField({
             'block w-full rounded-md border-gray-300 shadow-sm transition-colors',
             'focus:ring-primary-500 focus:border-primary-500',
             'placeholder:text-gray-400',
+            'border-2', // Added border width
+            'focus:outline-none', // Removed outline on focus
+            'focus:ring-2', // Added ring width on focus
+            'px-4', // Added padding on x-axis
+            'py-2', // Added padding on y-axis
+            'text-sm', // Added text size
             icon && 'pl-10',
             error && 'border-red-300 focus:ring-red-500 focus:border-red-500',
             className

@@ -1,47 +1,30 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
 import { useAdmin } from '../hooks/useAdmin';
-import { AdminStats } from '../components/admin/AdminStats';
+import { useComplaints } from '../hooks/useComplaints';
 import { ComplaintList } from '../components/admin/ComplaintList';
-import { UserList } from '../components/admin/UserList';
-import { LoadingSpinner } from '../components/LoadingSpinner';
+import { AdminStats } from '../components/admin/AdminStats';
 
 export function AdminDashboard() {
   const { isAdmin, loading, error } = useAdmin();
+  const { complaints, loading: complaintsLoading, error: complaintsError } = useComplaints();
 
-  if (loading) {
-    return <LoadingSpinner />;
+  if (loading || complaintsLoading) {
+    return <div>Loading...</div>;
   }
 
-  if (error) {
-    return (
-      <div className="bg-accent-50 text-accent-700 p-4 rounded-md">
-        <p>{error.message}</p>
-      </div>
-    );
+  if (error || complaintsError) {
+    return <div>Error: {error?.message || complaintsError?.message}</div>;
   }
 
   if (!isAdmin) {
-    return <Navigate to="/" replace />;
+    return <div>You are not authorized to access this page.</div>;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-primary-600 -mt-6 -mx-6 px-6 py-12 sm:-mx-6 lg:-mx-8 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-white mb-4">Admin Dashboard</h1>
-          <p className="text-primary-100 max-w-3xl">
-            Manage complaints, users, and monitor system statistics.
-          </p>
-        </div>
-      </div>
-      
+    <div>
+      <h1>Admin Dashboard</h1>
       <AdminStats />
-      
-      <div className="grid gap-6 lg:grid-cols-2">
-        <ComplaintList />
-        <UserList />
-      </div>
+      <ComplaintList complaints={complaints} />
     </div>
   );
 }

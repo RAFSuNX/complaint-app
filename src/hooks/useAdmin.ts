@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { handleError } from '../services/complaints';
 
 export function useAdmin() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -21,11 +22,12 @@ export function useAdmin() {
           .eq('id', session.user.id)
           .single();
 
-        if (error) throw error;
+        if (error) {
+          handleError('check admin status', error);
+        }
         setIsAdmin(data?.is_admin ?? false);
       } catch (err) {
-        console.error('Error checking admin status:', err);
-        setError(err instanceof Error ? err : new Error('Failed to check admin status'));
+        handleError('check admin status', err);
         setIsAdmin(false);
       } finally {
         setLoading(false);

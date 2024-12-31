@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import type { User } from '../types/database';
+import { handleError } from '../services/complaints';
 
 export function useUsers() {
   const [users, setUsers] = useState<User[]>([]);
@@ -12,14 +13,18 @@ export function useUsers() {
 
   async function fetchUsers() {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
-      setUsers(data || []);
+      if (error) {
+        handleError('fetch users', error);
+      } else {
+        setUsers(data || []);
+      }
     } catch (error) {
-      console.error('Error fetching users:', error);
+      handleError('fetch users', error);
     } finally {
       setLoading(false);
     }
@@ -35,10 +40,13 @@ export function useUsers() {
         .update({ is_admin: !user.is_admin })
         .eq('id', userId);
 
-      if (error) throw error;
-      await fetchUsers();
+      if (error) {
+        handleError('toggle admin status', error);
+      } else {
+        await fetchUsers();
+      }
     } catch (error) {
-      console.error('Error toggling admin status:', error);
+      handleError('toggle admin status', error);
     }
   }
 

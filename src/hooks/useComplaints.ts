@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Complaint } from '../types/database';
 import { fetchComplaints } from '../services/complaints';
+import { handleError } from '../services/complaints';
 
 export function useComplaints() {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
@@ -13,7 +14,7 @@ export function useComplaints() {
         const data = await fetchComplaints();
         setComplaints(data);
       } catch (err) {
-        console.error('Error loading complaints:', err);
+        handleError('load complaints', err);
         setError(err instanceof Error ? err : new Error('Failed to load complaints'));
       } finally {
         setLoading(false);
