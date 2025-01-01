@@ -1,82 +1,134 @@
 import React from 'react';
-import { Link, Outlet } from 'react-router-dom';
-import { FileText, LogIn, LogOut, UserPlus } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import { useNavigate } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { LogOut, Menu } from 'lucide-react';
 
-export function Layout() {
-  const navigate = useNavigate();
-  const [user, setUser] = React.useState(null);
+export default function Layout() {
+  const { user, profile, signOut } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
-  React.useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/');
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-primary-50">
-      <nav className="bg-primary-600 shadow-lg">
+    <div className="min-h-screen bg-gray-50">
+      <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
               <Link to="/" className="flex items-center">
-                <FileText className="h-6 w-6 text-white" />
-                <span className="ml-2 text-xl font-semibold text-white">
-                  Complaint Portal
-                </span>
+                <span className="text-xl font-bold text-gray-900">ComplaintManager</span>
               </Link>
             </div>
-            <div className="flex items-center space-x-4">
-              <Link
-                to="/submit"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-700 bg-white hover:bg-primary-50 transition-colors"
-              >
-                Submit Complaint
-              </Link>
+
+            <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-8">
               {user ? (
-                <button
-                  onClick={handleLogout}
-                  className="inline-flex items-center text-white hover:text-primary-100 transition-colors"
-                >
-                  <LogOut className="h-5 w-5 mr-1" />
-                  Logout
-                </button>
+                <>
+                  <Link
+                    to="/dashboard"
+                    className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Dashboard
+                  </Link>
+                  {profile?.role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+                    >
+                      Admin
+                    </Link>
+                  )}
+                  <button
+                    onClick={handleSignOut}
+                    className="flex items-center text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </button>
+                </>
               ) : (
                 <>
                   <Link
                     to="/login"
-                    className="inline-flex items-center text-white hover:text-primary-100 transition-colors"
+                    className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
                   >
-                    <LogIn className="h-5 w-5 mr-1" />
                     Login
                   </Link>
                   <Link
                     to="/register"
-                    className="inline-flex items-center text-white hover:text-primary-100 transition-colors"
+                    className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
                   >
-                    <UserPlus className="h-5 w-5 mr-1" />
+                    Register
+                  </Link>
+                </>
+              )}
+            </div>
+
+            <div className="flex items-center sm:hidden">
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+              >
+                <Menu className="h-6 w-6" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        {isMenuOpen && (
+          <div className="sm:hidden">
+            <div className="pt-2 pb-3 space-y-1">
+              {user ? (
+                <>
+                  <Link
+                    to="/dashboard"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-gray-700 hover:bg-gray-50"
+                  >
+                    Dashboard
+                  </Link>
+                  {profile?.role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-gray-700 hover:bg-gray-50"
+                    >
+                      Admin
+                    </Link>
+                  )}
+                  <button
+                    onClick={handleSignOut}
+                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-gray-700 hover:bg-gray-50"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-gray-700 hover:bg-gray-50"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-gray-700 hover:bg-gray-50"
+                  >
                     Register
                   </Link>
                 </>
               )}
             </div>
           </div>
-        </div>
+        )}
       </nav>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Outlet />
       </main>
     </div>
