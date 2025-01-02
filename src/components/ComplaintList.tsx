@@ -37,11 +37,23 @@ export function ComplaintList({ complaints, isAdmin }: ComplaintListProps) {
                 <div className="text-sm font-medium text-gray-900">{complaint.title}</div>
                 <div className="text-sm text-gray-500">{complaint.category}</div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(complaint.status)}`}>
-                  {complaint.status}
-                </span>
-              </td>
+<td className="px-6 py-4 whitespace-nowrap">
+  {isAdmin ? (
+<select
+  value={complaint.status}
+  onChange={(event) => import('../lib/complaints/update').then(({ updateStatus }) => updateStatus(complaint.id, event.target.value as Complaint['status']))}
+>
+      <option value="pending">Pending</option>
+      <option value="in_progress">In Progress</option>
+      <option value="resolved">Resolved</option>
+      <option value="rejected">Rejected</option>
+    </select>
+  ) : (
+    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(complaint.status)}`}>
+      {complaint.status}
+    </span>
+  )}
+</td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getPriorityColor(complaint.priority)}`}>
                   {complaint.priority}
@@ -50,11 +62,11 @@ export function ComplaintList({ complaints, isAdmin }: ComplaintListProps) {
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {formatDate(complaint.createdAt)}
               </td>
-              {isAdmin && (
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {complaint.userId}
-                </td>
-              )}
+{isAdmin && (
+  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+    {complaint.anonymousId ? 'Anonymous' : complaint.fullName}
+  </td>
+)}
             </tr>
           ))}
         </tbody>

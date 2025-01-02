@@ -23,7 +23,7 @@ interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   error: Error | null;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<{ profile: UserProfile; } | undefined>;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -58,17 +58,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  async function signIn(email: string, password: string) {
-    try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      const profileDoc = await getDoc(doc(db, 'profiles', result.user.uid));
-      if (profileDoc.exists()) {
-        setProfile(profileDoc.data() as UserProfile);
-      }
-    } catch (error) {
-      throw new AppError('Invalid email or password', 'auth/invalid-credentials');
+async function signIn(email: string, password: string) {
+  try {
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    const profileDoc = await getDoc(doc(db, 'profiles', result.user.uid));
+    if (profileDoc.exists()) {
+      const profile = profileDoc.data() as UserProfile;
+      setProfile(profile);
+      return { profile };
     }
+  } catch (error) {
+    throw new AppError('Invalid email or password', 'auth/invalid-credentials');
   }
+}
 
   async function signUp(email: string, password: string, fullName: string) {
     try {

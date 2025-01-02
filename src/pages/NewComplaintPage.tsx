@@ -58,7 +58,7 @@ const handleSubmit = async (data: ComplaintFormData, files?: File[]) => {
   } catch (error) {
     console.error('Error submitting complaint:', error);
     const message = error instanceof AppError 
-      ? error.message 
+      ? error.message + ' (' + error.code + ')' 
       : 'Failed to submit complaint. Please try again.';
     toast.error(message);
   } finally {

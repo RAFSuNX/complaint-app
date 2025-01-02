@@ -5,12 +5,12 @@ import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 
 export default function AdminPage() {
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const { complaints, loading, error } = useComplaints(true);
 
-  if (!profile || profile.role !== 'admin') {
-    return <Navigate to="/dashboard" replace />;
-  }
+if (!profile || !user || profile.role !== 'admin') {
+  return <Navigate to="/admin/login" replace />;
+}
 
   if (loading) {
     return <div className="text-center">Loading...</div>;

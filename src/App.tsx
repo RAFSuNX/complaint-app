@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminPage from './pages/AdminPage';
+import AdminLoginPage from './pages/AdminLoginPage';
 import NewComplaintPage from './pages/NewComplaintPage';
 import TrackComplaintPage from './pages/TrackComplaintPage';
 import { AuthProvider } from './contexts/AuthContext';
@@ -23,6 +24,7 @@ function App() {
             <Route path="register" element={<RegisterPage />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="admin" element={<AdminPage />} />
+<Route path="admin/login" element={<AdminLoginPage />} />
             <Route path="complaints/new" element={<NewComplaintPage />} />
             <Route path="track" element={<TrackComplaintPage />} />
           </Route>

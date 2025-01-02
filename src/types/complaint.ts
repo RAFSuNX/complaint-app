@@ -14,6 +14,7 @@ export interface Complaint {
   createdAt: string;
   updatedAt: string;
   isAnonymous: boolean;
+  fullName?: string; // Added fullName property
 }
 
 export type ComplaintFormData = Pick<Complaint, 

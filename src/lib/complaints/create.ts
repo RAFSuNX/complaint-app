@@ -1,4 +1,4 @@
-import { collection, addDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { FirebaseError } from 'firebase/app';
 import { db, storage } from '../firebase';
@@ -47,7 +47,7 @@ export async function createComplaint(
       }
     }
 
-    const trackingNumber = generateTrackingNumber();
+    const trackingNumber = await generateUniqueTrackingNumber();
     const anonymousId = userId ? undefined : generateAnonymousId();
     
 const complaintData: Omit<Complaint, 'id' | 'createdAt' | 'updatedAt'> = {
@@ -57,7 +57,8 @@ const complaintData: Omit<Complaint, 'id' | 'createdAt' | 'updatedAt'> = {
   trackingNumber,
   status: 'pending',
   attachments,
-  isAnonymous: !userId
+  isAnonymous: !userId,
+  fullName: userId ? (await getDoc(doc(db, 'profiles', userId))).data()?.fullName as string : undefined
 };
 
 console.log('Complaint data being added to Firestore:', complaintData);
