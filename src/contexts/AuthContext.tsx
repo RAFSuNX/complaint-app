@@ -1,131 +1,81 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { 
   User,
-  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
-  onAuthStateChanged,
-  sendPasswordResetEmail
+  onAuthStateChanged
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
-import { AppError } from '../utils/errorHandling';
-
-interface UserProfile {
-  id: string;
-  fullName: string;
-  role: 'user' | 'admin';
-  avatarUrl?: string;
-}
+import { auth } from '../lib/firebase';
+import { getUserProfile } from '../lib/db/users';
+import type { UserProfile } from '../lib/db/users';
 
 interface AuthContextType {
   user: User | null;
-  profile: UserProfile | null;
-  loading: boolean;
-  error: Error | null;
-  signIn: (email: string, password: string) => Promise<{ profile: UserProfile; } | undefined>;
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  userProfile: UserProfile | null;
+  signIn: (email: string, password: string) => Promise<{ user: User }>;
+  signUp: (email: string, password: string) => Promise<{ user: User }>;
   signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
+  loading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       if (user) {
-        try {
-          const profileDoc = await getDoc(doc(db, 'profiles', user.uid));
-          if (profileDoc.exists()) {
-            setProfile(profileDoc.data() as UserProfile);
-          }
-        } catch (error) {
-          console.error('Error fetching profile:', error);
-        }
+        const profile = await getUserProfile(user.uid);
+        setUserProfile(profile);
       } else {
-        setProfile(null);
+        setUserProfile(null);
       }
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
-async function signIn(email: string, password: string) {
-  try {
+  const signIn = async (email: string, password: string) => {
     const result = await signInWithEmailAndPassword(auth, email, password);
-    const profileDoc = await getDoc(doc(db, 'profiles', result.user.uid));
-    if (profileDoc.exists()) {
-      const profile = profileDoc.data() as UserProfile;
-      setProfile(profile);
-      return { profile };
-    }
-  } catch (error) {
-    throw new AppError('Invalid email or password', 'auth/invalid-credentials');
-  }
-}
+    const profile = await getUserProfile(result.user.uid);
+    setUserProfile(profile);
+    return result;
+  };
 
-  async function signUp(email: string, password: string, fullName: string) {
-    try {
-      const result = await createUserWithEmailAndPassword(auth, email, password);
-      const profile = {
-        id: result.user.uid,
-        fullName,
-        role: 'user' as const,
-        createdAt: new Date().toISOString()
-      };
-      await setDoc(doc(db, 'profiles', result.user.uid), profile);
-      setProfile(profile);
-    } catch (error) {
-      throw new AppError('Failed to create account', 'auth/signup-failed');
-    }
-  }
+  const signUp = async (email: string, password: string) => {
+    return createUserWithEmailAndPassword(auth, email, password);
+  };
 
-  async function signOut() {
-    try {
-      await firebaseSignOut(auth);
-      setProfile(null);
-    } catch (error) {
-      throw new AppError('Failed to sign out', 'auth/signout-failed');
-    }
-  }
-
-  async function resetPassword(email: string) {
-    try {
-      await sendPasswordResetEmail(auth, email);
-    } catch (error) {
-      throw new AppError('Failed to send password reset email', 'auth/reset-failed');
-    }
-  }
+  const signOut = async () => {
+    await firebaseSignOut(auth);
+    setUserProfile(null);
+  };
 
   const value = {
     user,
-    profile,
-    loading,
-    error,
+    userProfile,
     signIn,
     signUp,
     signOut,
-    resetPassword,
+    loading
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

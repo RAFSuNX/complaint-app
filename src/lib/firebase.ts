@@ -4,30 +4,26 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: "AIzaSyA8pDR1SSPDsPByNWR0cj6eouxWkxX9Xv4",
+  authDomain: "complaints-98229.firebaseapp.com",
+  projectId: "complaints-98229",
+  storageBucket: "complaints-98229.firebasestorage.app",
+  messagingSenderId: "574344229974",
+  appId: "1:574344229974:web:47ea8fbd213bd15ab2b7f7"
 };
 
 // Initialize Firebase
 let app;
 try {
   app = initializeApp(firebaseConfig);
-  console.log('Firebase initialized successfully');
 } catch (error) {
-  console.error('Error initializing Firebase:', error);
-  throw error;
-}
-
-// Initialize services
-if (!app) {
-  throw new Error('Firebase app is not initialized');
+  if (error.code !== 'app/duplicate-app') {
+    throw error;
+  }
+  // If we already have an app, get that instead
+  app = getApp();
 }
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-console.log('Firebase services initialized successfully');

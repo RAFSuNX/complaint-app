@@ -1,3 +1,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  .bg-white {
+    box-shadow: none !important;
+  }
+
+  main *, main {
+    visibility: visible;
+  }
+
+  main {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  button, .print\:hidden {
+    display: none !important;
+  }
+}

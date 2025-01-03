@@ -1,136 +1,80 @@
-import React from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, Menu } from 'lucide-react';
+import { Button } from './ui/Button';
+import { Flag, LogOut, User, Shield } from 'lucide-react';
 
-export default function Layout() {
-  const { user, profile, signOut } = useAuth();
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+interface LayoutProps {
+  children: ReactNode;
+}
 
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
+export function Layout({ children }: LayoutProps) {
+  const { user, userProfile, signOut } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex">
-              <Link to="/" className="flex items-center">
-                <span className="text-xl font-bold text-gray-900">ComplaintManager</span>
+      <header className="bg-white shadow-sm">
+        <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 justify-between items-center">
+            <div className="flex items-center">
+              <Link to="/" className="flex items-center text-green-600">
+                <Flag className="h-8 w-8" />
+                <span className="ml-2 text-xl font-bold">BD Complaints</span>
               </Link>
             </div>
-
-            <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-8">
+            
+            <div className="flex items-center space-x-4">
+              <Link to="/submit">
+                <Button variant="primary">Submit Complaint</Button>
+              </Link>
+              <Link to="/track">
+                <Button variant="outline">Track Complaint</Button>
+              </Link>
+              
               {user ? (
                 <>
-                  <Link
-                    to="/dashboard"
-                    className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Dashboard
-                  </Link>
-                  {profile?.role === 'admin' && (
-                    <Link
-                      to="/admin"
-                      className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-                    >
-                      Admin
+                  {userProfile?.role === 'admin' && (
+                    <Link to="/admin">
+                      <Button variant="ghost">
+                        <Shield className="h-5 w-5" />
+                      </Button>
                     </Link>
                   )}
-                  <button
-                    onClick={handleSignOut}
-                    className="flex items-center text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Sign Out
-                  </button>
+                  <Link to="/dashboard">
+                    <Button variant="ghost">
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </Link>
+                  <Button variant="ghost" onClick={signOut}>
+                    <LogOut className="h-5 w-5" />
+                  </Button>
                 </>
               ) : (
                 <>
-                  <Link
-                    to="/login"
-                    className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Login
+                  <Link to="/signin">
+                    <Button variant="secondary">Sign In</Button>
                   </Link>
-                  <Link
-                    to="/register"
-                    className="text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Register
-                  </Link>
-                </>
-              )}
-            </div>
-
-            <div className="flex items-center sm:hidden">
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
-              >
-                <Menu className="h-6 w-6" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile menu */}
-        {isMenuOpen && (
-          <div className="sm:hidden">
-            <div className="pt-2 pb-3 space-y-1">
-              {user ? (
-                <>
-                  <Link
-                    to="/dashboard"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-gray-700 hover:bg-gray-50"
-                  >
-                    Dashboard
-                  </Link>
-                  {profile?.role === 'admin' && (
-                    <Link
-                      to="/admin"
-                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-gray-700 hover:bg-gray-50"
-                    >
-                      Admin
-                    </Link>
-                  )}
-                  <button
-                    onClick={handleSignOut}
-                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-gray-700 hover:bg-gray-50"
-                  >
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-gray-700 hover:bg-gray-50"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:text-gray-700 hover:bg-gray-50"
-                  >
-                    Register
+                  <Link to="/signup">
+                    <Button variant="outline">Sign Up</Button>
                   </Link>
                 </>
               )}
             </div>
           </div>
-        )}
-      </nav>
+        </nav>
+      </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Outlet />
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        {children}
       </main>
+
+      <footer className="bg-white border-t">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+          <p className="text-center text-gray-500">
+            © {new Date().getFullYear()} BD Complaints. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
